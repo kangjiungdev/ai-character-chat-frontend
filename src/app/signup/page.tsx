@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { APIResponse } from "@/types/api";
 
 export default function Home() {
   useEffect(() => {
@@ -19,6 +20,11 @@ export default function Home() {
     const birthDateInput = document.getElementById(
       "birth-date"
     ) as HTMLInputElement;
+
+    const allInputs = document.querySelectorAll("input");
+    allInputs.forEach((input) => {
+      input.setAttribute("autocomplete", "off");
+    });
 
     function restrictInput(input: HTMLInputElement, pattern: RegExp) {
       input.addEventListener("input", () => {
@@ -76,51 +82,67 @@ export default function Home() {
 
       const userId = trimValue(userIdInput);
       if (userId.length < 6 || userId.length > 15) {
-        createErrorMessage("아이디는 6자~15자여야 합니다.");
+        createErrorMessage("아이디는 6자~15자여야 합니다");
         return;
       }
 
       const pw = trimValue(passwordInput);
       if (pw.length < 8 || pw.length > 20) {
-        createErrorMessage("비밀번호는 8자~20자여야 합니다.");
+        createErrorMessage("비밀번호는 8자~20자여야 합니다");
         return;
       }
       if (pw !== passwordCheckInput.value) {
-        createErrorMessage("비밀번호가 일치하지 않습니다.");
+        createErrorMessage("비밀번호가 일치하지 않습니다");
         return;
       }
 
       const name = trimValue(nameInput);
       if (!name) {
-        createErrorMessage("이름을 입력해 주세요.");
+        createErrorMessage("이름을 입력해 주세요");
         return;
       }
       if (name.length > 15) {
-        createErrorMessage("이름은 15자 이하(좌우 공백 제외)여야 합니다.");
+        createErrorMessage("이름은 15자 이하(좌우 공백 제외)여야 합니다");
         return;
       }
 
       if (trimValue(phoneInput).length !== 13) {
-        createErrorMessage("전화번호 형식이 올바르지 않습니다.");
+        createErrorMessage("전화번호 형식이 올바르지 않습니다");
         return;
       }
 
       if (!birthDateInput.value || !birthDateInput.checkValidity()) {
-        createErrorMessage("생년월일 형식이 올바르지 않습니다.");
+        createErrorMessage("생년월일 형식이 올바르지 않습니다");
         return;
       }
 
       nameInput.value = name;
 
       const formData = new FormData(form);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/signup`, {
-        method: "POST",
-        body: formData,
-      });
-      const json = await res.json();
-      console.log(json);
+
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/signup`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+        if (res.ok) {
+          window.location.href = "/";
+          return;
+        } else {
+          const json = (await res.json()) as APIResponse<{
+            message: string;
+          }>;
+          createErrorMessage(json.data.message);
+        }
+      } catch {
+        createErrorMessage("서버와의 연결에 실패했습니다.");
+      }
     });
   }, []);
+
   const today = new Date().toISOString().split("T")[0];
   const hundredYearsAgo = new Date(
     new Date().setFullYear(new Date().getFullYear() - 100)
