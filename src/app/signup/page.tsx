@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { APIResponse } from "@/types/api";
 
 export default function Home() {
+  const router = useRouter();
+
   useEffect(() => {
     const form = document.getElementById("signup-form") as HTMLFormElement;
     const userIdInput = document.getElementById("user-id") as HTMLInputElement;
@@ -129,7 +132,7 @@ export default function Home() {
           }
         );
         if (res.ok) {
-          window.location.href = "/";
+          router.push("/");
           return;
         } else {
           const json = (await res.json()) as APIResponse<{
@@ -141,7 +144,7 @@ export default function Home() {
         createErrorMessage("서버와의 연결에 실패했습니다");
       }
     });
-  }, []);
+  }, [router]);
 
   const today = new Date().toISOString().split("T")[0];
   const hundredYearsAgo = new Date(
@@ -152,8 +155,6 @@ export default function Home() {
   return (
     <main className="flex items-center justify-center mt-[72px] min-h-[calc(100dvh-72px)] bg-[#343A40] p-8">
       <form
-        action="/signup"
-        method="POST"
         id="signup-form"
         className="bg-[#2a2b2f] text-white p-8 rounded-2xl w-[30vw] mt-4 mb-5 shadow-[0_0_12px_rgba(0,0,0,0.6)]"
       >
@@ -251,7 +252,7 @@ export default function Home() {
         {/* 버튼 */}
         <button
           type="submit"
-          className="w-full py-3 bg-[#facc15] text-black rounded-md font-bold text-lg mt-4 hover:bg-[#eab308] transition-colors duration-200"
+          className="w-full py-3 bg-[#facc15] text-black rounded-md font-bold text-lg mt-4 hover:bg-[#eab308] transition-colors duration-200 cursor-pointer"
         >
           Sign Up
         </button>
