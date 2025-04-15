@@ -138,7 +138,7 @@ export default function Home() {
           createErrorMessage(json.data.message);
         }
       } catch {
-        createErrorMessage("서버와의 연결에 실패했습니다.");
+        createErrorMessage("서버와의 연결에 실패했습니다");
       }
     });
   }, []);
