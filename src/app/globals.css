@@ -3,6 +3,15 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --font-ui: Pretendard, "Inter var", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  --gray-bg: #2a2b2f;
+  --gray-input: #3a3b3f;
+  --gray-border: #555;
+  --gray-text: #ccc;
+  --yellow: #facc15;
+  --yellow-hover: #eab308;
 }
 
 @theme inline {
@@ -20,7 +29,18 @@
 }
 
 body {
-  background: var(--background);
+  background: #343A40;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-ui);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);         /* 흰색 아이콘 */
+  cursor: pointer;           /* 마우스 포인터 손가락으로 */
+  opacity: 0.85;             /* 약간 투명도 줘서 예쁨 */
+  transition: filter 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  filter: invert(1) brightness(1.3); /* hover 시 살짝 더 밝게 */
 }
