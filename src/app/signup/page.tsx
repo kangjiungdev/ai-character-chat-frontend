@@ -1,14 +1,43 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { APIResponse } from "@/types/api";
 
-export default function Home() {
+export default function SignupPage() {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
 
-  useEffect(() => {
-    const form = document.getElementById("signup-form") as HTMLFormElement;
+  const today = new Date().toISOString().split("T")[0];
+  const hundredYearsAgo = new Date(
+    new Date().setFullYear(new Date().getFullYear() - 100)
+  )
+    .toISOString()
+    .split("T")[0];
+
+  const trimValue = (input: HTMLInputElement) => input.value.trim();
+
+  const createErrorMessage = (message: string) => {
+    const form = formRef.current;
+    if (!form) return;
+
+    const existing = document.getElementById("error-msg");
+    if (existing) existing.remove();
+
+    const p = document.createElement("p");
+    p.id = "error-msg";
+    p.textContent = message;
+    p.style.color = "#f87171";
+    p.classList.add("mt-5");
+    form.appendChild(p);
+    form.style.paddingBottom = "20px";
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const form = formRef.current;
+    if (!form) return;
+
     const userIdInput = document.getElementById("user-id") as HTMLInputElement;
     const passwordInput = document.getElementById(
       "password"
@@ -24,49 +53,100 @@ export default function Home() {
       "birth-date"
     ) as HTMLInputElement;
 
-    const allInputs = document.querySelectorAll("input");
-    allInputs.forEach((input) => {
-      input.setAttribute("autocomplete", "off");
-    });
+    const userId = trimValue(userIdInput);
+    if (userId.length < 6 || userId.length > 15) {
+      createErrorMessage("아이디는 6자~15자여야 합니다");
+      return;
+    }
 
-    function restrictInput(input: HTMLInputElement, pattern: RegExp) {
+    const pw = trimValue(passwordInput);
+    if (pw.length < 8 || pw.length > 20) {
+      createErrorMessage("비밀번호는 8자~20자여야 합니다");
+      return;
+    }
+    if (pw !== passwordCheckInput.value) {
+      createErrorMessage("비밀번호가 일치하지 않습니다");
+      return;
+    }
+
+    const name = trimValue(nameInput);
+    if (!name) {
+      createErrorMessage("이름을 입력해 주세요");
+      return;
+    }
+    if (name.length > 15) {
+      createErrorMessage("이름은 15자 이하(좌우 공백 제외)여야 합니다");
+      return;
+    }
+
+    if (trimValue(phoneInput).length !== 13) {
+      createErrorMessage("전화번호 형식이 올바르지 않습니다");
+      return;
+    }
+
+    if (!birthDateInput.value || !birthDateInput.checkValidity()) {
+      createErrorMessage("생년월일 형식이 올바르지 않습니다");
+      return;
+    }
+
+    nameInput.value = name;
+
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/signup`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        router.push("/");
+      } else {
+        const json = (await res.json()) as APIResponse<{ message: string }>;
+        createErrorMessage(json.data.message);
+      }
+    } catch {
+      createErrorMessage("서버와의 연결에 실패했습니다");
+    }
+  };
+
+  useEffect(() => {
+    const allInputs = document.querySelectorAll("input");
+    allInputs.forEach((input) => input.setAttribute("autocomplete", "off"));
+
+    const restrictInput = (input: HTMLInputElement, pattern: RegExp) => {
       input.addEventListener("input", () => {
         input.value = input.value.replace(pattern, "");
       });
-    }
+    };
 
-    function trimValue(input: HTMLInputElement) {
-      return input.value.trim();
-    }
+    restrictInput(
+      document.getElementById("user-id") as HTMLInputElement,
+      /\s|[^a-zA-Z0-9]/g
+    );
+    restrictInput(
+      document.getElementById("password") as HTMLInputElement,
+      /\s|[^a-zA-Z0-9]/g
+    );
+    restrictInput(
+      document.getElementById("password-check") as HTMLInputElement,
+      /\s|[^a-zA-Z0-9]/g
+    );
 
-    function createErrorMessage(message: string) {
-      const existing = document.getElementById("error-msg");
-      if (existing) existing.remove();
+    const phoneInput = document.getElementById(
+      "phone-number"
+    ) as HTMLInputElement;
+    if (!phoneInput) return;
 
-      const p = document.createElement("p");
-      p.id = "error-msg";
-      p.textContent = message;
-      p.style.color = "#f87171";
-      p.classList.add("mt-5");
-      form.appendChild(p);
-      form.style.paddingBottom = "20px";
-    }
-
-    // 입력 제한
-    restrictInput(userIdInput, /\s|[^a-zA-Z0-9]/g);
-    restrictInput(passwordInput, /\s|[^a-zA-Z0-9]/g);
-    restrictInput(passwordCheckInput, /\s|[^a-zA-Z0-9]/g);
-
-    // 전화번호 숫자만 입력 허용
-    phoneInput.addEventListener("keydown", (e) => {
+    const keydownHandler = (e: KeyboardEvent) => {
       const key = e.key;
       const allowed = ["Backspace", "Delete", "ArrowLeft", "ArrowRight"];
       if (!/\d/.test(key) && !allowed.includes(key)) {
         e.preventDefault();
       }
-    });
+    };
 
-    phoneInput.addEventListener("input", () => {
+    const inputHandler = () => {
       const numbers = phoneInput.value.replace(/\D/g, "");
       if (numbers.length <= 3) {
         phoneInput.value = numbers;
@@ -78,85 +158,24 @@ export default function Home() {
           7
         )}-${numbers.slice(7, 11)}`;
       }
-    });
+    };
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    phoneInput.addEventListener("keydown", keydownHandler);
+    phoneInput.addEventListener("input", inputHandler);
 
-      const userId = trimValue(userIdInput);
-      if (userId.length < 6 || userId.length > 15) {
-        createErrorMessage("아이디는 6자~15자여야 합니다");
-        return;
-      }
+    return () => {
+      phoneInput.removeEventListener("keydown", keydownHandler);
+      phoneInput.removeEventListener("input", inputHandler);
+    };
+  }, []);
 
-      const pw = trimValue(passwordInput);
-      if (pw.length < 8 || pw.length > 20) {
-        createErrorMessage("비밀번호는 8자~20자여야 합니다");
-        return;
-      }
-      if (pw !== passwordCheckInput.value) {
-        createErrorMessage("비밀번호가 일치하지 않습니다");
-        return;
-      }
-
-      const name = trimValue(nameInput);
-      if (!name) {
-        createErrorMessage("이름을 입력해 주세요");
-        return;
-      }
-      if (name.length > 15) {
-        createErrorMessage("이름은 15자 이하(좌우 공백 제외)여야 합니다");
-        return;
-      }
-
-      if (trimValue(phoneInput).length !== 13) {
-        createErrorMessage("전화번호 형식이 올바르지 않습니다");
-        return;
-      }
-
-      if (!birthDateInput.value || !birthDateInput.checkValidity()) {
-        createErrorMessage("생년월일 형식이 올바르지 않습니다");
-        return;
-      }
-
-      nameInput.value = name;
-
-      const formData = new FormData(form);
-
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/signup`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-        if (res.ok) {
-          router.push("/");
-          return;
-        } else {
-          const json = (await res.json()) as APIResponse<{
-            message: string;
-          }>;
-          createErrorMessage(json.data.message);
-        }
-      } catch {
-        createErrorMessage("서버와의 연결에 실패했습니다");
-      }
-    });
-  }, [router]);
-
-  const today = new Date().toISOString().split("T")[0];
-  const hundredYearsAgo = new Date(
-    new Date().setFullYear(new Date().getFullYear() - 100)
-  )
-    .toISOString()
-    .split("T")[0];
   return (
     <main className="flex items-center justify-center mt-[72px] min-h-[calc(100dvh-72px)] bg-[#343A40] p-8">
       <form
         id="signup-form"
+        ref={formRef}
         className="bg-[#2a2b2f] text-white p-8 rounded-2xl w-[30vw] mt-4 mb-5 shadow-[0_0_12px_rgba(0,0,0,0.6)]"
+        onSubmit={handleSubmit}
       >
         {/* 아이디 */}
         <div className="mb-6">
