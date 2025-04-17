@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { APIResponse } from "@/types/api";
+import GlobalDomEffect from "../components/GlobalDomEffect";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -111,26 +112,22 @@ export default function SignupPage() {
   };
 
   useEffect(() => {
-    const allInputs = document.querySelectorAll("input");
-    allInputs.forEach((input) => input.setAttribute("autocomplete", "off"));
+    GlobalDomEffect.allInputAutoCompleteOff();
 
-    const restrictInput = (input: HTMLInputElement, pattern: RegExp) => {
-      input.addEventListener("input", () => {
-        input.value = input.value.replace(pattern, "");
-      });
-    };
+    const restrictInput = GlobalDomEffect.restrictInput;
+    const regex = GlobalDomEffect.EngAndNumberOnly;
 
     restrictInput(
       document.getElementById("user-id") as HTMLInputElement,
-      /\s|[^a-zA-Z0-9]/g
+      regex
     );
     restrictInput(
       document.getElementById("password") as HTMLInputElement,
-      /\s|[^a-zA-Z0-9]/g
+      regex
     );
     restrictInput(
       document.getElementById("password-check") as HTMLInputElement,
-      /\s|[^a-zA-Z0-9]/g
+      regex
     );
 
     const phoneInput = document.getElementById(
