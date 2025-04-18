@@ -1,29 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { APIResponse } from "@/types/api";
+import Link from "next/link";
+import { useUser } from "@/app/context/UserContext";
 
 export default function NotFoundPage() {
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    const fetchMessage = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/get-characters`,
-          {
-            method: "POST",
-          }
-        );
-        const json = (await res.json()) as APIResponse<{ status: string }>;
-        setMessage(json.data.status);
-      } catch (error) {
-        console.error("API 요청 실패:", error);
-      }
-    };
-
-    fetchMessage();
-  }, []);
-
-  return <main className="p-8 mt-[72px] bg-[#343A40]">{message}</main>;
+  const { user } = useUser();
+  return (
+    <main
+      className="p-8 mt-[72px] bg-[#343A40] flex flex-col items-center justify-center mt-[72px] min-h-[calc(100dvh-72px)] font-semibold"
+      style={{ fontFamily: '"Spoqa Han Sans Neo", sans-serif' }}
+    >
+      <h2 className="text-4xl mb-7">
+        {user?.id}404 - This page could not be found
+      </h2>
+      <p>
+        <Link
+          href="/"
+          className="text-2xl no-underline hover:underline text-[#facc15]"
+        >
+          Go home →
+        </Link>
+      </p>
+    </main>
+  );
 }

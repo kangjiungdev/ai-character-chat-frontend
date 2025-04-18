@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { APIResponse } from "@/types/api";
-import { fetchWithCsrf } from "./components/CsrfToken";
+import { fetchWithCsrf } from "@/app/components/CsrfToken";
 
 export default function Home() {
   const [message, setMessage] = useState("");
@@ -13,21 +13,18 @@ export default function Home() {
         const res = await fetchWithCsrf(
           `${process.env.NEXT_PUBLIC_API_URL}/api/public/get-characters`,
           {
-            method: "POST",
+            method: "GET",
             credentials: "include",
             skipCsrf: true,
           }
         );
 
         if (res.ok) {
-          const json = (await res.json()) as APIResponse<{
-            message: string;
-            data: string;
-          }>;
-          console.log(json.data.data);
+          const json = (await res.json()) as APIResponse<object>;
+          console.log(json.data);
         } else {
-          const json = (await res.json()) as APIResponse<{ message: string }>;
-          console.log(json.data.message);
+          const json = (await res.json()) as APIResponse<object>;
+          console.log(json.message);
         }
       } catch {
         console.log("서버와의 연결에 실패했습니다");

@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { APIResponse } from "@/types/api";
-import GlobalDomEffect from "../components/GlobalDomEffect";
-import { fetchWithCsrf } from "../components/CsrfToken";
+import GlobalDomEffect from "@/app/components/GlobalDomEffect";
+import { fetchWithCsrf } from "@/app/components/CsrfToken";
 
 export default function LoginPage() {
   const router = useRouter();
