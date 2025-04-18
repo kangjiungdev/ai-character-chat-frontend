@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useUser } from "@/app/context/UserContext";
 
-// 404페이지도 usestate 사용 가능하게 설정해야함. 네비바가 ssr로
+// 404페이지도 usestate 사용 가능하게 설정해야함. 네비바가 ssr로 로드되어야하는데 현재, 404페이지에선 매번 fetch함.
 export default function NotFoundPage() {
   return (
     <main

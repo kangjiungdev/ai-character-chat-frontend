@@ -35,8 +35,8 @@ export default function NavBar() {
                 id="user-avatar-btn"
                 className="flex justify-center items-center w-full h-full gap-5"
               >
-                <Link href={`user/${user.id}`} className="hover:underline">
-                  {user.id}
+                <Link href={`user/${user}`} className="hover:underline">
+                  {user}
                 </Link>
                 <button
                   id="logout-btn"

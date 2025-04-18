@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { APIResponse } from "@/types/api";
 import GlobalDomEffect from "@/app/components/GlobalDomEffect";
 import { fetchWithCsrf } from "@/app/components/CsrfToken";
+import { useUser } from "@/app/context/UserContext";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,6 +28,8 @@ export default function LoginPage() {
     form.appendChild(p);
     form.style.paddingBottom = "20px";
   };
+
+  const { setUser } = useUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +75,8 @@ export default function LoginPage() {
       );
 
       if (res.ok) {
+        const json = await res.json();
+        setUser(json.data);
         router.push("/");
       } else {
         const json = (await res.json()) as APIResponse<object>;

@@ -3,10 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { fetchWithCsrf } from "@/app/components/CsrfToken";
 
-type User = {
-  id: string;
-  name: string;
-} | null;
+type User = string | null;
 
 type UserContextType = {
   user: User;
