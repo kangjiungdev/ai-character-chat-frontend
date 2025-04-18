@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { APIResponse } from "@/types/api";
 import GlobalDomEffect from "../components/GlobalDomEffect";
+import { fetchWithCsrf } from "../components/CsrfToken";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,6 +32,7 @@ export default function LoginPage() {
     e.preventDefault();
     const form = formRef.current;
     if (!form) return;
+    const regex = GlobalDomEffect.EngAndNumberOnly;
 
     const userIdInput = document.getElementById("user-id") as HTMLInputElement;
     const passwordInput = document.getElementById(
@@ -42,26 +44,38 @@ export default function LoginPage() {
       createErrorMessage("아이디는 6자~15자여야 합니다");
       return;
     }
+    if (regex.test(userId)) {
+      createErrorMessage("아이디는 영문자와 숫자만 입력 가능합니다");
+      return;
+    }
 
     const pw = trimValue(passwordInput);
     if (pw.length < 8 || pw.length > 20) {
       createErrorMessage("비밀번호는 8자~20자여야 합니다");
       return;
     }
+    if (regex.test(passwordInput.value)) {
+      createErrorMessage("비밀번호는 영문자와 숫자만 입력 가능합니다");
+      return;
+    }
 
     const formData = new FormData(form);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetchWithCsrf(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/login`,
+        {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        }
+      );
 
       if (res.ok) {
         router.push("/");
       } else {
-        const json = (await res.json()) as APIResponse<{ message: string }>;
-        createErrorMessage(json.data.message);
+        const json = (await res.json()) as APIResponse<object>;
+        createErrorMessage(json.message);
       }
     } catch {
       createErrorMessage("서버와의 연결에 실패했습니다");
@@ -70,18 +84,6 @@ export default function LoginPage() {
 
   useEffect(() => {
     GlobalDomEffect.allInputAutoCompleteOff();
-
-    const restrictInput = GlobalDomEffect.restrictInput;
-    const regex = GlobalDomEffect.EngAndNumberOnly;
-
-    restrictInput(
-      document.getElementById("user-id") as HTMLInputElement,
-      regex
-    );
-    restrictInput(
-      document.getElementById("password") as HTMLInputElement,
-      regex
-    );
   }, []);
 
   return (
