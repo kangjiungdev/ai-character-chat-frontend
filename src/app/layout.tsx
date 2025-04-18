@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
 import { UserProvider } from "@/app/context/UserContext";
+import { getUserFromSession } from "@/app/lib/getUserFromSession";
 import NavBar from "@/app/components/NavBar";
 
 const geistSans = Geist({
@@ -19,17 +20,18 @@ export const metadata: Metadata = {
   description: "AI Character Chat",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getUserFromSession();
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <UserProvider>
+        <UserProvider initialUser={user}>
           <NavBar />
           {children}
         </UserProvider>
