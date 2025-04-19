@@ -10,9 +10,9 @@ export default function NavBar() {
     <header className="fixed top-0 left-0 w-full bg-[#1F2327] z-[1000]">
       <nav className="w-full h-[72px] flex items-center bg-[#1F2327]">
         <div
-          className={`grid grid-cols-${
-            !user ? "3" : "4"
-          } w-full text-white text-base`}
+          className={`w-full text-white text-base grid ${
+            user ? "grid-cols-4" : "grid-cols-3"
+          }`}
         >
           <div className="flex justify-center items-center w-full h-full">
             <Link href="/" className="hover:underline">

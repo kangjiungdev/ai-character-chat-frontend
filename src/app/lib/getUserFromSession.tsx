@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-export async function getUserFromSession() {
+export default async function getUserFromSession() {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("aichat_sess");
 
